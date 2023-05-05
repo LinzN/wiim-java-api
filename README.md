@@ -1,9 +1,12 @@
 # wiim-java-api
 
 ### What is wiim-java-api
-wiim-java-api is a implementation of the http api [WiiM HTTP API](https://www.wiimhome.com/pdf/HTTP%20API%20for%20WiiM%20Mini.pdf) in java to interact with WiiM devices.
+wiim-java-api is a implementation of the http api [WiiM HTTP API](https://www.wiimhome.com/pdf/HTTP%20API%20for%20WiiM%20Mini.pdf) written in java to interact with WiiM devices.
 
-The api is commpatible with the WiiM Pro and Wiim mini [WiiMhome](https://www.wiimhome.com/) 
+The api is compatible with the following WiiM devices [WiiMhome](https://www.wiimhome.com/) 
+
+- WiiM Pro  [See product](https://www.wiimhome.com/WiiMPro/Overview) 
+- Wiim mini [See product](https://www.wiimhome.com/WiiMMini/Overview) 
 
 ### Java version
 
