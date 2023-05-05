@@ -1,16 +1,23 @@
 # wiim-java-api
 
 ### What is wiim-java-api
-wiim-java-api is a implementation of the http api [WiiM HTTP API](https://www.wiimhome.com/pdf/HTTP%20API%20for%20WiiM%20Mini.pdf) written in java to interact with WiiM devices.
+The project wiim-java-api is a implementation of the [WiiM HTTP API](https://www.wiimhome.com/pdf/HTTP%20API%20for%20WiiM%20Mini.pdf) written in java to interact with WiiM devices.
 
 The api is compatible with the following WiiM devices [WiiMhome](https://www.wiimhome.com/) 
 
 - WiiM Pro  [See product](https://www.wiimhome.com/WiiMPro/Overview) 
 - Wiim mini [See product](https://www.wiimhome.com/WiiMMini/Overview) 
 
+Other WiiM devices may also work if they using the same httpAPI.
 ### Java version
 
 This library was built for [Java 11](https://openjdk.java.net/projects/jdk/11/).
+
+
+### API Information
+This api is pulling information of the current WiiMDevice dataSet every 1000 milliseconds in the background. That means that using `GET` methods in the api will reflect data from the last successful pull.
+
+However, `SET` methods will be applied instantly
 
 ### How to install
 
@@ -24,6 +31,11 @@ This library was built for [Java 11](https://openjdk.java.net/projects/jdk/11/).
     <version>1.0.0</version>
 </dependency>
 ```
+
+
+### Javadocs & Documentation
+In progress
+
 
 ### Examples
   ```java
@@ -56,12 +68,7 @@ public class ExampleDeviceStatus {
     }
 }
   ```
-More examples here:  https://github.com/LinzN/wiim-java-api/tree/master/src/main/java/examples
 
-
-### Javadocs & Documentation
-In progress
-
-
-### How to implement it
-In progress
+If you need some more examples to get started, check
+the [examples' directory](https://github.com/LinzN/wiim-java-api/tree/master/src/main/java/examples) in this project.
+Any contribution is welcomed!
