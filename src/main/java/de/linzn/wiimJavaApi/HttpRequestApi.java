@@ -6,6 +6,7 @@
 
 package de.linzn.wiimJavaApi;
 
+
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import org.json.JSONObject;
 

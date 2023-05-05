@@ -5,6 +5,7 @@
  */
 package de.linzn.wiimJavaApi;
 
+
 import de.linzn.wiimJavaApi.exceptions.WiimAPINoDataException;
 
 public class DeviceInformation extends HttpRequestApi {

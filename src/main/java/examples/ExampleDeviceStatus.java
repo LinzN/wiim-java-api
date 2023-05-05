@@ -1,12 +1,12 @@
-package examples;
-
-import de.linzn.wiimJavaApi.WiimAPI;
-
 /**
  * EXAMPLE
  * Get current status uf the WiiMDevice like "play, stop...."
  * The given ip 10.50.0.99 is an example
  */
+package examples;
+
+import de.linzn.wiimJavaApi.WiimAPI;
+
 public class ExampleDeviceStatus {
     /* IP Address of the device */
     static String wiimDeviceIPAddress = "10.50.0.99";
