@@ -11,20 +11,9 @@
 
 package de.linzn.wiimJavaApi;
 
-import de.linzn.wiimJavaApi.response.TelegramResponse;
-
 public class WiimAPI {
-    private String token;
 
-    public WiimAPI(String token) {
-        this.token = token;
+    public WiimAPI() {
     }
 
-    public TelegramResponse<String> sendMessage(String chatID, String text) {
-        return SendMessage.init(this.token, chatID, text).sendAPIRequest();
-    }
-
-    public TelegramResponse<String> getUpdate(long offset) {
-        return GetUpdate.init(this.token, offset).sendAPIRequest();
-    }
 }
