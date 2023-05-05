@@ -17,6 +17,7 @@ This library was built for [Java 11](https://openjdk.java.net/projects/jdk/11/).
 #### Maven
 
 ```xml
+<!-- https://builds.app.stem-system.de/plugin/repository/everything/de/linzn/wiim-java-api/ -->
 <dependency>
     <groupId>de.linzn</groupId>
     <artifactId>wiim-java-api</artifactId>
