@@ -11,12 +11,17 @@
 
 package de.linzn.wiimJavaApi.staticApp;
 
+import de.linzn.wiimJavaApi.WiimAPI;
+
 public class TESTWIMMStaticApp {
 
-    public static void main(String[] args) {
-        if (args.length >= 2) {
-            String command = args[0];
-            String token = args[1];
+    public static void main(String[] args) throws InterruptedException {
+        WiimAPI wiimAPI = new WiimAPI("10.50.0.99");
+        wiimAPI.setSslCheck(false);
+        wiimAPI.connect();
+        while (true) {
+            System.out.println("PlayerStatus: " + wiimAPI.getPlayerStatus().get_status());
+            Thread.sleep(900);
         }
     }
 }
