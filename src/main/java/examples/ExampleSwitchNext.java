@@ -4,14 +4,15 @@
  * terms of the given license in the LICENSE file
  *
  * EXAMPLE
- * Get current status uf the WiiMDevice like "play, stop...."
+ * Switch every 10000 milliseconds to the next song
  * The given ip 10.50.0.99 is an example
  */
 package examples;
 
 import de.linzn.wiimJavaApi.WiimAPI;
+import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
 
-public class ExampleDeviceStatus {
+public class ExampleSwitchNext {
     /* IP Address of the device */
     static String wiimDeviceIPAddress = "10.50.0.99";
 
@@ -24,14 +25,17 @@ public class ExampleDeviceStatus {
         /* The current dataSet will be pulled automatic every 1000 ms*/
         wiimAPI.connect();
 
-        /* Infinity loop to check frequently device status and the name of the device */
+        /* Infinity loop to switch to next song */
         while (true) {
-            /* Get the current status of the player. Like "stop, play, ..."*/
+            /* Switch every 10000 milliseconds to the next song */
             String name = wiimAPI.getDeviceInformation().get_DeviceName();
-            String currentStatus = wiimAPI.getWiimPlayer().get_status();
-            System.out.println("Current status of the device " + name + " is " + currentStatus);
             try {
-                Thread.sleep(1000);
+                wiimAPI.getWiimPlayer().set_next();
+                System.out.println("Device " + name + " switched to the next song!");
+            } catch (WiimAPIDataPushException ignored) {
+            }
+            try {
+                Thread.sleep(10000);
             } catch (InterruptedException ignored) {
             }
         }

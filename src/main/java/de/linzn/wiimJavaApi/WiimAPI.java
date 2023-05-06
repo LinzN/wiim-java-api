@@ -12,7 +12,7 @@ import de.linzn.wiimJavaApi.exceptions.WiimAPIGeneralException;
 public class WiimAPI {
     private String ipAddress;
     private DeviceInformation deviceInformation;
-    private PlayerStatus playerStatus;
+    private WiimPlayer wiimPlayer;
     private boolean sslCheck;
 
     public WiimAPI(String ipAddress) {
@@ -26,7 +26,7 @@ public class WiimAPI {
 
     public void connect() {
         this.deviceInformation = new DeviceInformation(this);
-        this.playerStatus = new PlayerStatus(this);
+        this.wiimPlayer = new WiimPlayer(this);
     }
 
     public String getIpAddress() {
@@ -52,9 +52,9 @@ public class WiimAPI {
         throw new WiimAPIGeneralException("WiimAPI is not connected yet. Use connect() to connect to the Wiim device!");
     }
 
-    public PlayerStatus getPlayerStatus() {
-        if (playerStatus != null) {
-            return this.playerStatus;
+    public WiimPlayer getWiimPlayer() {
+        if (this.wiimPlayer != null) {
+            return this.wiimPlayer;
         }
         throw new WiimAPIGeneralException("WiimAPI is not connected yet. Use connect() to connect to the Wiim device!");
     }

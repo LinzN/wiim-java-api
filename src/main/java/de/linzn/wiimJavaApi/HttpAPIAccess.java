@@ -8,6 +8,7 @@ package de.linzn.wiimJavaApi;
 
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
+import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
 import org.json.JSONObject;
 
 import javax.net.ssl.*;
@@ -20,7 +21,7 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 
-public class HttpRequestApi {
+public class HttpAPIAccess {
 
     private final String httpAPIRequest;
     private final WiimAPI wiimAPI;
@@ -40,7 +41,7 @@ public class HttpRequestApi {
     HostnameVerifier allHostsValid = (hostname, session) -> true;
     private Date lastPull;
 
-    HttpRequestApi(String httpAPIRequest, WiimAPI wiimAPI) {
+    HttpAPIAccess(String httpAPIRequest, WiimAPI wiimAPI) {
         this.httpAPIRequest = httpAPIRequest;
         this.wiimAPI = wiimAPI;
         this.lastPull = null;
@@ -86,6 +87,32 @@ public class HttpRequestApi {
             this.lastPull = new Date();
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             throw new WiimAPIDataFetchException(e);
+        }
+    }
+
+    protected void pushDataUpdate(String update) throws WiimAPIDataPushException {
+        try {
+            URL url = new URL("https://" + wiimAPI.getIpAddress() + "/httpapi.asp?command=" + update);
+            /* Ignore SSL */
+            if (!this.wiimAPI.hasSSLCheck()) {
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            }
+
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            StringBuilder inline = new StringBuilder();
+            Scanner scanner = new Scanner(url.openStream());
+            while (scanner.hasNext()) {
+                inline.append(scanner.nextLine());
+            }
+            scanner.close();
+            // Response will be ignored at the moment because its always "OK"
+        } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
+            throw new WiimAPIDataPushException(e);
         }
     }
 

@@ -7,10 +7,11 @@
 package de.linzn.wiimJavaApi;
 
 
+import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPINoDataException;
 
-public class PlayerStatus extends HttpRequestApi {
-    PlayerStatus(WiimAPI wiimAPI) {
+public class WiimPlayer extends HttpAPIAccess {
+    WiimPlayer(WiimAPI wiimAPI) {
         super("getPlayerStatus", wiimAPI);
     }
 
@@ -110,5 +111,49 @@ public class PlayerStatus extends HttpRequestApi {
             return this.dataSet.getInt("mute");
         }
         throw new WiimAPINoDataException();
+    }
+
+    public void play_url(String url) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:play:" + url);
+    }
+
+    public void playlist_url(String url, int index) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:playlist:" + url + ":" + index);
+    }
+
+    public void set_pause() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:pause");
+    }
+
+    public void set_resume() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:resume");
+    }
+
+    public void set_onepause() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:onepause");
+    }
+
+    public void set_prev() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:prev");
+    }
+
+    public void set_next() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:next");
+    }
+
+    public void set_stop() throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:stop");
+    }
+
+    public void set_vol(int volume) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:vol:" + volume);
+    }
+
+    public void set_mute(int mute) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:mute:" + mute);
+    }
+
+    public void set_loopmode(int loopmode) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:loopmode:" + loopmode);
     }
 }

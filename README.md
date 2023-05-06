@@ -38,6 +38,7 @@ In progress
 
 
 ### Examples
+
   ```java
 import de.linzn.wiimJavaApi.WiimAPI;
 
@@ -58,7 +59,7 @@ public class ExampleDeviceStatus {
         while (true) {
             /* Get the current status of the player. Like "stop, play, ..."*/
             String name = wiimAPI.getDeviceInformation().get_DeviceName();
-            String currentStatus = wiimAPI.getPlayerStatus().get_status();
+            String currentStatus = wiimAPI.getWiimPlayer().get_status();
             System.out.println("Current status of the device " + name + " is " + currentStatus);
             try {
                 Thread.sleep(1000);
