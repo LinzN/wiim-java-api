@@ -9,11 +9,15 @@ package de.linzn.wiimJavaApi;
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPIGeneralException;
 
+import java.util.concurrent.TimeUnit;
+
 public class WiimAPI {
     private String ipAddress;
     private DeviceInformation deviceInformation;
     private WiimPlayer wiimPlayer;
     private boolean sslCheck;
+    int pullInterval;
+    TimeUnit pullIntervalTimeUnit;
 
     public WiimAPI(String ipAddress) {
         this(ipAddress, true);
@@ -22,6 +26,9 @@ public class WiimAPI {
     public WiimAPI(String ipAddress, boolean sslCheck) {
         this.ipAddress = ipAddress;
         this.sslCheck = sslCheck;
+        this.pullInterval = 1000;
+        this.pullIntervalTimeUnit = TimeUnit.MILLISECONDS;
+
     }
 
     public void connect() {
@@ -43,6 +50,11 @@ public class WiimAPI {
 
     public void setSslCheck(boolean sslCheck) {
         this.sslCheck = sslCheck;
+    }
+
+    public void setPullInterval(int pullInterval, TimeUnit timeUnit){
+        this.pullInterval = pullInterval;
+        this.pullIntervalTimeUnit = timeUnit;
     }
 
     public DeviceInformation getDeviceInformation() {

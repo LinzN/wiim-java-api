@@ -20,6 +20,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class HttpAPIAccess {
 
@@ -54,7 +55,7 @@ public class HttpAPIAccess {
         Executors.newSingleThreadExecutor().submit(() -> {
             while (true) {
                 try {
-                    Thread.sleep(1000);
+                    this.wiimAPI.pullIntervalTimeUnit.sleep(this.wiimAPI.pullInterval);
                     requestDataSetUpdate();
                 } catch (WiimAPIDataFetchException e) {
                     e.printStackTrace();
