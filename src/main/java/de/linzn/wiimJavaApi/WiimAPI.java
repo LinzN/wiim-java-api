@@ -50,7 +50,8 @@ public class WiimAPI {
             deviceInformation.processNewData(deviceInformationData);
             JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
             wiimPlayer.processNewData(wiimPlayerData);
-        } catch (WiimAPIDataFetchException ignored) {
+        } catch (WiimAPIDataFetchException e) {
+            e.printStackTrace();
         }
 
         Executors.newSingleThreadExecutor().submit(() -> {
@@ -61,7 +62,8 @@ public class WiimAPI {
                     deviceInformation.processNewData(deviceInformationData);
                     JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
                     wiimPlayer.processNewData(wiimPlayerData);
-                } catch (InterruptedException | WiimAPIDataFetchException ignored) {
+                } catch (InterruptedException | WiimAPIDataFetchException e) {
+                    e.printStackTrace();
                 }
             }
         });
