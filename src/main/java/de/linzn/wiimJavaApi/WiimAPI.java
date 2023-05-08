@@ -7,8 +7,11 @@
 package de.linzn.wiimJavaApi;
 
 
+import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIGeneralException;
+import org.json.JSONObject;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class WiimAPI {
@@ -16,6 +19,8 @@ public class WiimAPI {
     private DeviceInformation deviceInformation;
     private WiimPlayer wiimPlayer;
     private boolean sslCheck;
+    int standByTimer;
+    TimeUnit standByTimerTimeUnit;
     int pullInterval;
     TimeUnit pullIntervalTimeUnit;
 
@@ -28,12 +33,38 @@ public class WiimAPI {
         this.sslCheck = sslCheck;
         this.pullInterval = 1000;
         this.pullIntervalTimeUnit = TimeUnit.MILLISECONDS;
+        this.standByTimer = 3;
+        this.standByTimerTimeUnit = TimeUnit.MINUTES;
 
     }
 
     public void connect() {
         this.deviceInformation = new DeviceInformation(this);
         this.wiimPlayer = new WiimPlayer(this);
+        this.pull_scheduler();
+    }
+
+    private void pull_scheduler() {
+        try {
+            JSONObject deviceInformationData = deviceInformation.requestDataSetUpdate();
+            deviceInformation.processNewData(deviceInformationData);
+            JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
+            wiimPlayer.processNewData(wiimPlayerData);
+        } catch (WiimAPIDataFetchException ignored) {
+        }
+
+        Executors.newSingleThreadExecutor().submit(() -> {
+            while (true) {
+                try {
+                    pullIntervalTimeUnit.sleep(pullInterval);
+                    JSONObject deviceInformationData = deviceInformation.requestDataSetUpdate();
+                    deviceInformation.processNewData(deviceInformationData);
+                    JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
+                    wiimPlayer.processNewData(wiimPlayerData);
+                } catch (InterruptedException | WiimAPIDataFetchException ignored) {
+                }
+            }
+        });
     }
 
     public String getIpAddress() {
@@ -52,9 +83,14 @@ public class WiimAPI {
         this.sslCheck = sslCheck;
     }
 
-    public void setPullInterval(int pullInterval, TimeUnit timeUnit){
+    public void setPullInterval(int pullInterval, TimeUnit timeUnit) {
         this.pullInterval = pullInterval;
         this.pullIntervalTimeUnit = timeUnit;
+    }
+
+    public void setStandByTimer(int standByTimer, TimeUnit timeUnit) {
+        this.standByTimer = standByTimer;
+        this.standByTimerTimeUnit = timeUnit;
     }
 
     public DeviceInformation getDeviceInformation() {

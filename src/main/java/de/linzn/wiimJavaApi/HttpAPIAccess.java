@@ -19,13 +19,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-public class HttpAPIAccess {
+public abstract class HttpAPIAccess {
 
     private final String httpAPIRequest;
-    private final WiimAPI wiimAPI;
+    protected final WiimAPI wiimAPI;
     protected JSONObject dataSet;
     TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -40,31 +38,16 @@ public class HttpAPIAccess {
     }
     };
     HostnameVerifier allHostsValid = (hostname, session) -> true;
-    private Date lastPull;
+    protected Date lastPull;
 
     HttpAPIAccess(String httpAPIRequest, WiimAPI wiimAPI) {
         this.httpAPIRequest = httpAPIRequest;
         this.wiimAPI = wiimAPI;
         this.lastPull = null;
         this.dataSet = new JSONObject();
-        try {
-            requestDataSetUpdate();
-        } catch (WiimAPIDataFetchException e) {
-            e.printStackTrace();
-        }
-        Executors.newSingleThreadExecutor().submit(() -> {
-            while (true) {
-                try {
-                    this.wiimAPI.pullIntervalTimeUnit.sleep(this.wiimAPI.pullInterval);
-                    requestDataSetUpdate();
-                } catch (WiimAPIDataFetchException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
-    private void requestDataSetUpdate() throws WiimAPIDataFetchException {
+    JSONObject requestDataSetUpdate() throws WiimAPIDataFetchException {
         try {
             URL url = new URL("https://" + wiimAPI.getIpAddress() + "/httpapi.asp?command=" + httpAPIRequest);
             /* Ignore SSL */
@@ -84,8 +67,7 @@ public class HttpAPIAccess {
                 inline.append(scanner.nextLine());
             }
             scanner.close();
-            this.dataSet = new JSONObject(inline.toString());
-            this.lastPull = new Date();
+            return new JSONObject(inline.toString());
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             throw new WiimAPIDataFetchException(e);
         }
@@ -120,4 +102,6 @@ public class HttpAPIAccess {
     public Date getLastPullDate() {
         return this.lastPull;
     }
+
+    abstract void processNewData(JSONObject jsonObject);
 }

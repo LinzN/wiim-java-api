@@ -9,10 +9,22 @@ package de.linzn.wiimJavaApi;
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPINoDataException;
+import org.json.JSONObject;
+
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WiimPlayer extends HttpAPIAccess {
+    private final AtomicBoolean isStandby;
+    private Date standbyTimer = null;
+
     WiimPlayer(WiimAPI wiimAPI) {
         super("getPlayerStatus", wiimAPI);
+        this.isStandby = new AtomicBoolean(false);
+    }
+
+    public boolean isStandby() {
+        return this.isStandby.get();
     }
 
     public int get_type() {
@@ -155,5 +167,32 @@ public class WiimPlayer extends HttpAPIAccess {
 
     public void set_loopmode(int loopmode) throws WiimAPIDataPushException {
         this.pushDataUpdate("setPlayerCmd:loopmode:" + loopmode);
+    }
+
+    @Override
+    void processNewData(JSONObject jsonObject) {
+        try {
+            String oldStatus = null;
+            if (this.dataSet.has("status")) {
+                oldStatus = this.dataSet.getString("status");
+            }
+            String status = jsonObject.getString("status");
+
+            if (oldStatus != null && oldStatus.equalsIgnoreCase(status)) {
+                if (status.equalsIgnoreCase("stop")) {
+                    if (!this.isStandby.get() && this.standbyTimer.getTime() + this.wiimAPI.standByTimerTimeUnit.toMillis(this.wiimAPI.standByTimer) < new Date().getTime()) {
+                        this.isStandby.set(true);
+                    }
+                }
+            } else {
+                this.standbyTimer = new Date();
+                this.isStandby.set(false);
+            }
+
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        this.dataSet = jsonObject;
+        this.lastPull = new Date();
     }
 }

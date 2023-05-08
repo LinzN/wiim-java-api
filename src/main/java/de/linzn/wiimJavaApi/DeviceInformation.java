@@ -7,6 +7,9 @@ package de.linzn.wiimJavaApi;
 
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPINoDataException;
+import org.json.JSONObject;
+
+import java.util.Date;
 
 public class DeviceInformation extends HttpAPIAccess {
     DeviceInformation(WiimAPI wiimAPI) {
@@ -536,5 +539,11 @@ public class DeviceInformation extends HttpAPIAccess {
             return this.dataSet.getString("GroupName");
         }
         throw new WiimAPINoDataException();
+    }
+
+    @Override
+    void processNewData(JSONObject jsonObject) {
+        this.dataSet = jsonObject;
+        this.lastPull = new Date();
     }
 }

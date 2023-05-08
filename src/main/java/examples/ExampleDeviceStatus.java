@@ -2,7 +2,6 @@
  * Copyright (C) 2023. Niklas Linz - All Rights Reserved
  * You may use, distribute and modify this code under the
  * terms of the given license in the LICENSE file
- *
  * EXAMPLE
  * Get current status uf the WiiMDevice like "play, stop...."
  * The given ip 10.50.0.99 is an example
