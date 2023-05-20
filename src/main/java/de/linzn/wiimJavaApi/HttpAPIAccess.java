@@ -7,8 +7,12 @@
 package de.linzn.wiimJavaApi;
 
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
+import de.linzn.wiimJavaApi.exceptions.WiimAPIInvalidDataException;
 import org.json.JSONObject;
 
 import javax.net.ssl.*;
@@ -22,9 +26,10 @@ import java.util.Scanner;
 
 public abstract class HttpAPIAccess {
 
-    private final String httpAPIRequest;
     protected final WiimAPI wiimAPI;
+    private final String httpAPIRequest;
     protected JSONObject dataSet;
+    protected Date lastPull;
     TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
             return null;
@@ -38,7 +43,6 @@ public abstract class HttpAPIAccess {
     }
     };
     HostnameVerifier allHostsValid = (hostname, session) -> true;
-    protected Date lastPull;
 
     HttpAPIAccess(String httpAPIRequest, WiimAPI wiimAPI) {
         this.httpAPIRequest = httpAPIRequest;
@@ -47,7 +51,7 @@ public abstract class HttpAPIAccess {
         this.dataSet = new JSONObject();
     }
 
-    JSONObject requestDataSetUpdate() throws WiimAPIDataFetchException {
+    JSONObject requestDataSetUpdate() throws WiimAPIDataFetchException, WiimAPIInvalidDataException {
         try {
             URL url = new URL("https://" + wiimAPI.getIpAddress() + "/httpapi.asp?command=" + httpAPIRequest);
             /* Ignore SSL */
@@ -67,7 +71,12 @@ public abstract class HttpAPIAccess {
                 inline.append(scanner.nextLine());
             }
             scanner.close();
-            return new JSONObject(inline.toString());
+            String data = inline.toString();
+            if (this.isValidJson(data)) {
+                return new JSONObject(data);
+            } else {
+                throw new WiimAPIInvalidDataException();
+            }
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             throw new WiimAPIDataFetchException(e);
         }
@@ -104,4 +113,15 @@ public abstract class HttpAPIAccess {
     }
 
     abstract void processNewData(JSONObject jsonObject);
+
+    protected boolean isValidJson(String json) {
+        ObjectMapper mapper = new ObjectMapper()
+                .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        try {
+            mapper.readTree(json);
+        } catch (JacksonException e) {
+            return false;
+        }
+        return true;
+    }
 }

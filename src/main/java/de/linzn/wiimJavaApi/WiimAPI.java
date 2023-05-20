@@ -9,33 +9,35 @@ package de.linzn.wiimJavaApi;
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIGeneralException;
+import de.linzn.wiimJavaApi.exceptions.WiimAPIInvalidDataException;
 import org.json.JSONObject;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class WiimAPI {
-    private String ipAddress;
-    private DeviceInformation deviceInformation;
-    private WiimPlayer wiimPlayer;
-    private boolean sslCheck;
+    IWiimLogger logger;
     int standByTimer;
     TimeUnit standByTimerTimeUnit;
     int pullInterval;
     TimeUnit pullIntervalTimeUnit;
+    private String ipAddress;
+    private DeviceInformation deviceInformation;
+    private WiimPlayer wiimPlayer;
+    private boolean sslCheck;
 
     public WiimAPI(String ipAddress) {
         this(ipAddress, true);
     }
 
     public WiimAPI(String ipAddress, boolean sslCheck) {
+        this.logger = new DefaultWiimLogger();
         this.ipAddress = ipAddress;
         this.sslCheck = sslCheck;
         this.pullInterval = 1000;
         this.pullIntervalTimeUnit = TimeUnit.MILLISECONDS;
         this.standByTimer = 3;
         this.standByTimerTimeUnit = TimeUnit.MINUTES;
-
     }
 
     public void connect() {
@@ -45,28 +47,29 @@ public class WiimAPI {
     }
 
     private void pull_scheduler() {
+        this.pull_data();
+        Executors.newSingleThreadExecutor().submit(() -> {
+            while (true) {
+                pullIntervalTimeUnit.sleep(pullInterval);
+                this.pull_data();
+            }
+        });
+    }
+
+    private void pull_data() {
         try {
             JSONObject deviceInformationData = deviceInformation.requestDataSetUpdate();
             deviceInformation.processNewData(deviceInformationData);
             JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
             wiimPlayer.processNewData(wiimPlayerData);
-        } catch (WiimAPIDataFetchException e) {
-            e.printStackTrace();
+        } catch (WiimAPIDataFetchException | WiimAPIInvalidDataException e) {
+            this.logger.error(e);
         }
+    }
 
-        Executors.newSingleThreadExecutor().submit(() -> {
-            while (true) {
-                try {
-                    pullIntervalTimeUnit.sleep(pullInterval);
-                    JSONObject deviceInformationData = deviceInformation.requestDataSetUpdate();
-                    deviceInformation.processNewData(deviceInformationData);
-                    JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
-                    wiimPlayer.processNewData(wiimPlayerData);
-                } catch (InterruptedException | WiimAPIDataFetchException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    public void setWiimLogger(IWiimLogger wiimLogger){
+        this.logger = wiimLogger;
+        this.logger.info("Register custom logger interface!");
     }
 
     public String getIpAddress() {

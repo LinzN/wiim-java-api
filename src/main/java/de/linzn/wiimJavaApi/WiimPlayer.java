@@ -23,6 +23,12 @@ public class WiimPlayer extends HttpAPIAccess {
         this.isStandby = new AtomicBoolean(false);
     }
 
+    /**
+     * Check if device is in standby mode or not.
+     * This will not get the information from the device itself its more a software solution indicated on play/stop status
+     *
+     * @return If the device is in standby mode or not
+     */
     public boolean isStandby() {
         return this.isStandby.get();
     }
@@ -118,11 +124,19 @@ public class WiimPlayer extends HttpAPIAccess {
         throw new WiimAPINoDataException();
     }
 
+    public void set_vol(int volume) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:vol:" + volume);
+    }
+
     public int get_mute() {
         if (this.dataSet.has("mute")) {
             return this.dataSet.getInt("mute");
         }
         throw new WiimAPINoDataException();
+    }
+
+    public void set_mute(int mute) throws WiimAPIDataPushException {
+        this.pushDataUpdate("setPlayerCmd:mute:" + mute);
     }
 
     public void play_url(String url) throws WiimAPIDataPushException {
@@ -157,14 +171,6 @@ public class WiimPlayer extends HttpAPIAccess {
         this.pushDataUpdate("setPlayerCmd:stop");
     }
 
-    public void set_vol(int volume) throws WiimAPIDataPushException {
-        this.pushDataUpdate("setPlayerCmd:vol:" + volume);
-    }
-
-    public void set_mute(int mute) throws WiimAPIDataPushException {
-        this.pushDataUpdate("setPlayerCmd:mute:" + mute);
-    }
-
     public void set_loopmode(int loopmode) throws WiimAPIDataPushException {
         this.pushDataUpdate("setPlayerCmd:loopmode:" + loopmode);
     }
@@ -189,8 +195,8 @@ public class WiimPlayer extends HttpAPIAccess {
                 this.isStandby.set(false);
             }
 
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (Exception e) {
+            this.wiimAPI.logger.error(e);
         }
         this.dataSet = jsonObject;
         this.lastPull = new Date();

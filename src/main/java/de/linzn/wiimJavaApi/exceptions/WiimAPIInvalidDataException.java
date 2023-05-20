@@ -5,8 +5,8 @@
  */
 package de.linzn.wiimJavaApi.exceptions;
 
-public class WiimAPINoDataException extends IllegalArgumentException {
-    public WiimAPINoDataException() {
-        super("Not data yet or this value is not supported from the WiiM-Device!");
+public class WiimAPIInvalidDataException extends Exception {
+    public WiimAPIInvalidDataException() {
+        super("Invalid data received!");
     }
 }
