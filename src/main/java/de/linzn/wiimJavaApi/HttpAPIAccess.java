@@ -7,12 +7,11 @@
 package de.linzn.wiimJavaApi;
 
 
-import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataPushException;
-import de.linzn.wiimJavaApi.exceptions.WiimAPIInvalidDataException;
 import org.json.JSONObject;
 
 import javax.net.ssl.*;
@@ -51,7 +50,7 @@ public abstract class HttpAPIAccess {
         this.dataSet = new JSONObject();
     }
 
-    JSONObject requestDataSetUpdate() throws WiimAPIDataFetchException, WiimAPIInvalidDataException {
+    JSONObject requestDataSetUpdate() throws WiimAPIDataFetchException {
         try {
             URL url = new URL("https://" + wiimAPI.getIpAddress() + "/httpapi.asp?command=" + httpAPIRequest);
             /* Ignore SSL */
@@ -75,7 +74,7 @@ public abstract class HttpAPIAccess {
             if (this.isValidJson(data)) {
                 return new JSONObject(data);
             } else {
-                throw new WiimAPIInvalidDataException();
+                return null;
             }
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
             throw new WiimAPIDataFetchException(e);
@@ -115,11 +114,11 @@ public abstract class HttpAPIAccess {
     abstract void processNewData(JSONObject jsonObject);
 
     protected boolean isValidJson(String json) {
-        ObjectMapper mapper = new ObjectMapper()
-                .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
         try {
+            ObjectMapper mapper = new ObjectMapper()
+                    .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
             mapper.readTree(json);
-        } catch (JacksonException e) {
+        } catch (JsonProcessingException e) {
             return false;
         }
         return true;

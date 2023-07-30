@@ -185,7 +185,7 @@ public class WiimPlayer extends HttpAPIAccess {
             String status = jsonObject.getString("status");
 
             if (oldStatus != null && oldStatus.equalsIgnoreCase(status)) {
-                if (status.equalsIgnoreCase("stop")) {
+                if (status.equalsIgnoreCase("stop") || status.equalsIgnoreCase("none")) {
                     if (!this.isStandby.get() && this.standbyTimer.getTime() + this.wiimAPI.standByTimerTimeUnit.toMillis(this.wiimAPI.standByTimer) < new Date().getTime()) {
                         this.isStandby.set(true);
                     }

@@ -9,7 +9,6 @@ package de.linzn.wiimJavaApi;
 
 import de.linzn.wiimJavaApi.exceptions.WiimAPIDataFetchException;
 import de.linzn.wiimJavaApi.exceptions.WiimAPIGeneralException;
-import de.linzn.wiimJavaApi.exceptions.WiimAPIInvalidDataException;
 import org.json.JSONObject;
 
 import java.util.concurrent.Executors;
@@ -25,12 +24,14 @@ public class WiimAPI {
     private DeviceInformation deviceInformation;
     private WiimPlayer wiimPlayer;
     private boolean sslCheck;
+    private boolean hasAPIError;
 
     public WiimAPI(String ipAddress) {
         this(ipAddress, true);
     }
 
     public WiimAPI(String ipAddress, boolean sslCheck) {
+        this.hasAPIError = false;
         this.logger = new DefaultWiimLogger();
         this.ipAddress = ipAddress;
         this.sslCheck = sslCheck;
@@ -57,17 +58,39 @@ public class WiimAPI {
     }
 
     private void pull_data() {
+        boolean apiErrorCheck = false;
         try {
             JSONObject deviceInformationData = deviceInformation.requestDataSetUpdate();
-            deviceInformation.processNewData(deviceInformationData);
+            if (deviceInformationData != null) {
+                deviceInformation.processNewData(deviceInformationData);
+            } else {
+                apiErrorCheck = true;
+            }
             JSONObject wiimPlayerData = wiimPlayer.requestDataSetUpdate();
-            wiimPlayer.processNewData(wiimPlayerData);
-        } catch (WiimAPIDataFetchException | WiimAPIInvalidDataException e) {
+            if (wiimPlayerData != null) {
+                wiimPlayer.processNewData(wiimPlayerData);
+            } else {
+                apiErrorCheck = true;
+
+            }
+        } catch (WiimAPIDataFetchException e) {
+            apiErrorCheck = true;
             this.logger.error(e);
         }
+        if (apiErrorCheck) {
+            if (!this.hasAPIError) {
+                this.wiimPlayer.wiimAPI.logger.error("Invalid json data from wiim device!");
+            }
+        } else {
+            if (this.hasAPIError) {
+                this.wiimPlayer.wiimAPI.logger.info("Valid json data received from wiim device!");
+            }
+        }
+
+        this.hasAPIError = apiErrorCheck;
     }
 
-    public void setWiimLogger(IWiimLogger wiimLogger){
+    public void setWiimLogger(IWiimLogger wiimLogger) {
         this.logger = wiimLogger;
         this.logger.info("Register custom logger interface!");
     }
@@ -110,5 +133,9 @@ public class WiimAPI {
             return this.wiimPlayer;
         }
         throw new WiimAPIGeneralException("WiimAPI is not connected yet. Use connect() to connect to the Wiim device!");
+    }
+
+    public boolean hasAPIError() {
+        return hasAPIError;
     }
 }
