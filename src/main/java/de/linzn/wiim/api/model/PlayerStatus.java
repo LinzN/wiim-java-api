@@ -41,6 +41,8 @@ public class PlayerStatus {
     private String volume;
     @JsonProperty("mute")
     private String mute;
+    @JsonProperty("Title")
+    private String title;
     @JsonProperty("plicount")
     private String playlistCount;
     @JsonProperty("plicurr")
@@ -152,6 +154,10 @@ public class PlayerStatus {
 
     public String getMute() {
         return mute;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getPlaylistCount() {

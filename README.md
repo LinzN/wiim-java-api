@@ -132,6 +132,43 @@ client.cancelAlarm(0);
 client.stopAlarm();   // Stop current running alarm
 ```
 
+## Device Monitor
+```java
+WiiMClient client = new WiiMClient("192.168.1.42");
+
+public TestApp(){
+    DeviceMonitor monitor = new DeviceMonitor(client) {
+
+        @Override
+        protected void onStartedPlaying(PlayerStatus status) {
+            System.out.println("Playing – vol " + status.getVolumeInt());
+        }
+
+        @Override
+        protected void onStopped(PlayerStatus status) {
+            System.out.println("Stopped");
+        }
+
+        @Override
+        protected void onStandby() {
+            System.out.println("Standby – Idl since 2 minutes");
+        }
+
+        @Override
+        protected void onVolumeChanged(int prev, int curr) {
+            System.out.println(prev + " → " + curr);
+        }
+
+        @Override
+        protected void onTrackChanged(PlayerStatus status) {
+            System.out.println("Track changed");
+        }
+        // There are more available
+    };
+    // Available also with monitor.start(); Default is 1000ms
+    monitor.start(800);
+}
+```
 ---
 
 ## Notes
