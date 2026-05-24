@@ -57,6 +57,7 @@ public class WiiMClient {
     private final String host;
     private final HttpClient http;
     private final ObjectMapper mapper;
+    public IWiiMLogger LOG;
 
 
     /**
@@ -75,11 +76,16 @@ public class WiiMClient {
      * @param timeoutSeconds HTTP request timeout in seconds
      */
     public WiiMClient(String host, int timeoutSeconds) {
+        this.LOG = new WiiMDefaultLogger();
         Properties props = System.getProperties();
         props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
         this.host = host;
         this.mapper = new ObjectMapper();
         this.http = buildTrustAllClient(timeoutSeconds);
+    }
+
+    public void registerLogger(IWiiMLogger logger) {
+        this.LOG = logger;
     }
 
 

@@ -180,7 +180,7 @@ public class PlayerStatus {
     }
 
     public enum PlaybackMode {
-        NONE(0), AIRPLAY(1), DLNA(2),
+        NONE(0), AIRPLAY(1), DLNA(2), CAST(5),
         WIIMU_PLAYLIST(10), USB_PLAYLIST(11), TF_PLAYLIST(16),
         SPOTIFY(31), TIDAL(32),
         AUX_IN(40), BLUETOOTH(41), EXTERNAL_STORAGE(42), OPTICAL_IN(43),

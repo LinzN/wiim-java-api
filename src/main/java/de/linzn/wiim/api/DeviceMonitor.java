@@ -61,7 +61,6 @@ public class DeviceMonitor {
 
     private static final int POLL_INTERVAL_MILLISECONDS = 1000;
     private static final int STANDBY_TIMEOUT_MINUTES = 2;
-    private static final Logger LOG = Logger.getLogger(DeviceMonitor.class.getName());
 
     // ── State ──────────────────────────────────────────────────────────────
 
@@ -108,7 +107,7 @@ public class DeviceMonitor {
         running = true;
         pollTask = scheduler.scheduleAtFixedRate(
                 this::poll, 0, poolMilliseconds, TimeUnit.MILLISECONDS);
-        LOG.info("DeviceMonitor started.");
+        this.client.LOG.info("DeviceMonitor started.");
     }
 
     public synchronized void start(){
@@ -125,7 +124,7 @@ public class DeviceMonitor {
             pollTask.cancel(false);
             pollTask = null;
         }
-        LOG.info("DeviceMonitor stopped.");
+        this.client.LOG.info("DeviceMonitor stopped.");
     }
 
     // ── Core polling loop ──────────────────────────────────────────────────
@@ -155,7 +154,7 @@ public class DeviceMonitor {
             updateStopTimer(current);
 
         } catch (Exception ex) {
-            LOG.log(Level.WARNING, "DeviceMonitor: poll error", ex);
+            this.client.LOG.warning("DeviceMonitor: poll error", ex);
             onPollError(ex);
         }
     }
@@ -235,7 +234,7 @@ public class DeviceMonitor {
      * @param current  new status snapshot
      */
     protected void onPlaybackStatusChanged(PlayerStatus previous, PlayerStatus current) {
-        LOG.fine(() -> "onPlaybackStatusChanged: " + previous.getStatus()
+        this.client.LOG.debug("onPlaybackStatusChanged: " + previous.getStatus()
                 + " → " + current.getStatus());
     }
 
@@ -244,7 +243,7 @@ public class DeviceMonitor {
      * (from stopped, paused, or loading).
      */
     protected void onStartedPlaying(PlayerStatus status) {
-        LOG.fine(() -> "onStartedPlaying: vol=" + status.getVolumeInt()
+        this.client.LOG.debug("onStartedPlaying: vol=" + status.getVolumeInt()
                 + " mode=" + status.getPlaybackMode());
     }
 
@@ -252,14 +251,14 @@ public class DeviceMonitor {
      * Called when playback is paused.
      */
     protected void onPaused(PlayerStatus status) {
-        LOG.fine(() -> "onPaused: pos=" + status.getCurrentPositionMs() + "ms");
+        this.client.LOG.debug("onPaused: pos=" + status.getCurrentPositionMs() + "ms");
     }
 
     /**
      * Called when paused playback resumes.
      */
     protected void onResumed(PlayerStatus status) {
-        LOG.fine(() -> "onResumed: pos=" + status.getCurrentPositionMs() + "ms");
+        this.client.LOG.debug("onResumed: pos=" + status.getCurrentPositionMs() + "ms");
     }
 
     /**
@@ -268,14 +267,14 @@ public class DeviceMonitor {
      * {@link #onStandby()} is also called.
      */
     protected void onStopped(PlayerStatus status) {
-        LOG.fine("onStopped");
+        this.client.LOG.debug("onStopped");
     }
 
     /**
      * Called when the device is buffering / loading a new stream.
      */
     protected void onLoading(PlayerStatus status) {
-        LOG.fine("onLoading");
+        this.client.LOG.debug("onLoading");
     }
 
     /**
@@ -286,7 +285,7 @@ public class DeviceMonitor {
      * automation system, etc.
      */
     protected void onStandby() {
-        LOG.info("onStandby: device idle for " + STANDBY_TIMEOUT_MINUTES + " minutes.");
+        this.client.LOG.debug("onStandby: device idle for " + STANDBY_TIMEOUT_MINUTES + " minutes.");
     }
 
     /**
@@ -296,21 +295,21 @@ public class DeviceMonitor {
      * @param current  new volume (0–100)
      */
     protected void onVolumeChanged(int previous, int current) {
-        LOG.fine(() -> "onVolumeChanged: " + previous + " → " + current);
+        this.client.LOG.debug("onVolumeChanged: " + previous + " → " + current);
     }
 
     /**
      * Called when the device is muted.
      */
     protected void onMuted() {
-        LOG.fine("onMuted");
+        this.client.LOG.debug("onMuted");
     }
 
     /**
      * Called when the device is unmuted.
      */
     protected void onUnmuted() {
-        LOG.fine("onUnmuted");
+        this.client.LOG.debug("onUnmuted");
     }
 
     /**
@@ -322,21 +321,21 @@ public class DeviceMonitor {
      */
     protected void onModeChanged(PlayerStatus.PlaybackMode previous,
                                  PlayerStatus.PlaybackMode current) {
-        LOG.fine(() -> "onModeChanged: " + previous + " → " + current);
+        this.client.LOG.debug("onModeChanged: " + previous + " → " + current);
     }
 
     /**
      * Called when the active track in a playlist changes.
      */
     protected void onTrackChanged(PlayerStatus status) {
-        LOG.fine(() -> "onTrackChanged: index=" + status.getPlaylistCurrent());
+        this.client.LOG.debug("onTrackChanged: index=" + status.getPlaylistCurrent());
     }
 
     /**
      * Called when the loop/shuffle mode changes.
      */
     protected void onLoopModeChanged(PlayerStatus.LoopMode newMode) {
-        LOG.fine(() -> "onLoopModeChanged: " + newMode);
+        this.client.LOG.debug("onLoopModeChanged: " + newMode);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────
@@ -347,7 +346,7 @@ public class DeviceMonitor {
      * @param error the exception that was thrown
      */
     protected void onPollError(Exception error) {
-        LOG.log(Level.WARNING, "onPollError: " + error.getMessage());
+        this.client.LOG.warning("onPollError: " + error.getMessage(), null);
     }
 
     /**
@@ -357,7 +356,7 @@ public class DeviceMonitor {
         try {
             r.run();
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, "Exception in " + name, ex);
+            this.client.LOG.error("Exception in " + name, ex);
         }
     }
 }
