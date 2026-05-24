@@ -139,31 +139,140 @@ WiiMClient client = new WiiMClient("192.168.1.42");
 public TestApp(){
     DeviceMonitor monitor = new DeviceMonitor(client) {
 
+        /**
+         * Called whenever the raw playback status string changes
+         * (play → pause, pause → stop, etc.).
+         *
+         * @param previous previous status snapshot
+         * @param current  new status snapshot
+         */
+        @Override
+        protected void onPlaybackStatusChanged(PlayerStatus previous, PlayerStatus current) {
+            System.out.println("onPlaybackStatusChanged: " + previous.getStatus()
+                    + " → " + current.getStatus());
+        }
+
+        /**
+         * Called when the device starts playing
+         * (from stopped, paused, or loading).
+         */
         @Override
         protected void onStartedPlaying(PlayerStatus status) {
-            System.out.println("Playing – vol " + status.getVolumeInt());
+            System.out.println("onStartedPlaying: vol=" + status.getVolumeInt()
+                    + " mode=" + status.getPlaybackMode());
         }
 
+        /**
+         * Called when playback is paused.
+         */
+        @Override
+        protected void onPaused(PlayerStatus status) {
+            System.out.println("onPaused: pos=" + status.getCurrentPositionMs() + "ms");
+        }
+
+        /**
+         * Called when paused playback resumes.
+         */
+        @Override
+        protected void onResumed(PlayerStatus status) {
+            System.out.println("onResumed: pos=" + status.getCurrentPositionMs() + "ms");
+        }
+
+        /**
+         * Called when playback stops completely.
+         * Note: after 2 minutes in this state,
+         * onStandby() is also called.
+         */
         @Override
         protected void onStopped(PlayerStatus status) {
-            System.out.println("Stopped");
+            System.out.println("onStopped");
         }
 
+        /**
+         * Called when the device is buffering / loading a new stream.
+         */
+        @Override
+        protected void onLoading(PlayerStatus status) {
+            System.out.println("onLoading");
+        }
+
+        /**
+         * Called when the device has been stopped for
+         * 2 minutes without resuming.
+         *
+         * <p>Override this to cut power relays, dim displays, notify a home
+         * automation system, etc.
+         */
         @Override
         protected void onStandby() {
-            System.out.println("Standby – Idl since 2 minutes");
+            System.out.println("onStandby: device idle for 2 minutes.");
         }
 
+        /**
+         * Called when the volume level changes.
+         *
+         * @param previous volume before the change (0–100)
+         * @param current  new volume (0–100)
+         */
         @Override
-        protected void onVolumeChanged(int prev, int curr) {
-            System.out.println(prev + " → " + curr);
+        protected void onVolumeChanged(int previous, int current) {
+            System.out.println("onVolumeChanged: " + previous + " → " + current);
         }
 
+        /**
+         * Called when the device is muted.
+         */
+        @Override
+        protected void onMuted() {
+            System.out.println("onMuted");
+        }
+
+        /**
+         * Called when the device is unmuted.
+         */
+        @Override
+        protected void onUnmuted() {
+            System.out.println("onUnmuted");
+        }
+
+        /**
+         * Called when the playback source/mode changes
+         * (e.g. Bluetooth → Spotify, Wi-Fi → optical in).
+         *
+         * @param previous previous playback mode
+         * @param current  new playback mode
+         */
+        @Override
+        protected void onModeChanged(PlayerStatus.PlaybackMode previous,
+                                     PlayerStatus.PlaybackMode current) {
+            System.out.println("onModeChanged: " + previous + " → " + current);
+        }
+
+        /**
+         * Called when the active track in a playlist changes.
+         */
         @Override
         protected void onTrackChanged(PlayerStatus status) {
-            System.out.println("Track changed");
+            System.out.println("onTrackChanged: index=" + status.getPlaylistCurrent());
         }
-        // There are more available
+
+        /**
+         * Called when the loop/shuffle mode changes.
+         */
+        @Override
+        protected void onLoopModeChanged(PlayerStatus.LoopMode newMode) {
+            System.out.println("onLoopModeChanged: " + newMode);
+        }
+
+        /**
+         * Called when the polling request fails (network error, device unreachable).
+         *
+         * @param error the exception that was thrown
+         */
+        @Override
+        protected void onPollError(Exception error) {
+            System.out.println("onPollError: " + error.getMessage());
+        }
     };
     // Available also with monitor.start(); Default is 1000ms
     monitor.start(800);
@@ -173,6 +282,6 @@ public TestApp(){
 
 ## Notes
 
-- WiiM devices use self-signed TLS certificates. This client intentionally disable certificate validation. **Use only in network.**
+- WiiM devices use self-signed TLS certificates. This client intentionally disable certificate validation. **Use only in local networks.**
 - All methods throws `WiiMApiException` (RuntimeException) by network or api errors!
 - HTTP-Requests are using `java.net.http.HttpClient` (Java 11+) 
