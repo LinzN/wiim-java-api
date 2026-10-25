@@ -18,8 +18,10 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -31,7 +33,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Java client for the WiiM HTTP API (v1.2).
@@ -77,8 +78,6 @@ public class WiiMClient {
      */
     public WiiMClient(String host, int timeoutSeconds) {
         this.LOG = new WiiMDefaultLogger();
-        Properties props = System.getProperties();
-        props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
         this.host = host;
         this.mapper = new ObjectMapper();
         this.http = buildTrustAllClient(timeoutSeconds);
@@ -115,14 +114,41 @@ public class WiiMClient {
     private static HttpClient buildTrustAllClient(int timeoutSeconds) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
+            /*
+             * WiiM devices use self-signed certificates without subject alternative names.
+             * An X509ExtendedTrustManager is responsible for the hostname check itself, so the
+             * JDK does not add its own check on top. This only affects this client; the former
+             * global system property "jdk.internal.httpclient.disableHostnameVerification"
+             * disabled the check for every HttpClient in the JVM and stopped working as soon as
+             * any other HttpClient was created before this one.
+             */
             TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
+                    new X509ExtendedTrustManager() {
+                        @Override
                         public void checkClientTrusted(X509Certificate[] chain, String authType) {
                         }
 
+                        @Override
                         public void checkServerTrusted(X509Certificate[] chain, String authType) {
                         }
 
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+                        }
+
+                        @Override
                         public X509Certificate[] getAcceptedIssuers() {
                             return new X509Certificate[0];
                         }
@@ -133,7 +159,6 @@ public class WiiMClient {
             return HttpClient.newBuilder()
                     .sslContext(sslContext)
                     .connectTimeout(Duration.ofSeconds(timeoutSeconds))
-                    //.hostnameVerifier((hostname, session) -> true)
                     .build();
         } catch (Exception e) {
             throw new WiiMApiException("Failed to create HTTP client: " + e.getMessage(), e);
