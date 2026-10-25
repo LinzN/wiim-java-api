@@ -15,7 +15,7 @@ Other WiiM devices may also work if they using the same httpAPI.
 
 ### Java version
 
-This library was built for [Java 11](https://openjdk.java.net/projects/jdk/11/).
+This library is built for [Java 25](https://openjdk.org/projects/jdk/25/) (see `pom.xml`).
 ### Maven
 
 ```xml
@@ -23,7 +23,7 @@ This library was built for [Java 11](https://openjdk.java.net/projects/jdk/11/).
 <dependency>
     <groupId>de.linzn</groupId>
     <artifactId>wiim-java-api</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 ### Remark:
@@ -282,6 +282,7 @@ public TestApp(){
 
 ## Notes
 
-- WiiM devices use self-signed TLS certificates. This client intentionally disable certificate validation. **Use only in local networks.**
+- WiiM devices use self-signed TLS certificates. This client intentionally disables certificate and hostname validation. **Use only in local networks.**
+- The validation is only disabled for the `HttpClient` of `WiiMClient`. Since 2.0.1 no JVM-wide system property is set anymore, so other HTTPS connections in the same application are still fully validated.
 - All methods throws `WiiMApiException` (RuntimeException) by network or api errors!
-- HTTP-Requests are using `java.net.http.HttpClient` (Java 11+) 
+- HTTP-Requests are using `java.net.http.HttpClient` 
